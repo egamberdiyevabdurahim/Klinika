@@ -42,22 +42,43 @@ class ChangePasswordView(APIView):
 
 
 class Userdetail(APIView):
-    permission_classes = [IsAuthenticated,]
+    # permission_classes = [IsAuthenticated,]
     def get(self, request, id):
         try:
             user = User.objects.get(id=id)
             ser = UserSer(user)
-            tashxis = Tashxis.objects.filter(user=user)
-            d = {}
-            sum_narx = tashxis.aggregate(Sum('narx'))
-            sum_tuladi = tashxis.aggregate(Sum('tuladi'))
-            sum_qoldi = tashxis.aggregate(Sum('qoldi'))
-            d['tuliq_narx'] = sum_narx['narx__sum']
-            d['tuliq_tuladi'] = sum_tuladi['tuladi__sum']
-            d['tuliq_qoldi'] = sum_qoldi['qoldi__sum']
-            d['tashxis'] = Tashxis.objects.filter(user=user).count()
+            if Tashxis.objects.filter(user=user):
+                tashxis = Tashxis.objects.filter(user=user)
+                c = {}
+                sum_narx = tashxis.aggregate(Sum('narx'))
+                sum_tuladi = tashxis.aggregate(Sum('tuladi'))
+                sum_qoldi = tashxis.aggregate(Sum('qoldi'))
+                c['tuliq_narx'] = sum_narx['narx__sum']
+                c['tuliq_tuladi'] = sum_tuladi['tuladi__sum']
+                c['tuliq_qoldi'] = sum_qoldi['qoldi__sum']
+                c['tashxis'] = Tashxis.objects.filter(user=user).count()
+                d = []
+                for x in tashxis:
+                    found = False
+                    for item in d:
+                        if item['tashxislar'] == x.sick:
+                            # item['tashxislar'] = x.sick
+                            item['narx'] += x.narx
+                            item['tuladi'] += x.tuladi
+                            item['qoldi'] += x.qoldi
+                            item['sum_tashxis'] += 1
+                            found = True
+                            break
+                    if not found:
+                        d.append({'tashxislar': x.sick, 'narx': x.narx,
+                                  'tuladi': x.tuladi, 'qoldi': x.qoldi,
+                                  'sum_tashxis': 1})
+                return Response({'data': ser.data,
+                                 'all_statistic': c,
+                                 'statistic': d})
             return Response({'data': ser.data,
-                             'statistic': d})
+                                'all_statistic': None,
+                                'statistic': None})
         except:
             return Response({'message': 'Not found'})
     
@@ -68,6 +89,11 @@ class Userdetail(APIView):
             ser.save()
             return Response(ser.data)
         return Response(ser.errors)
+    
+    def delete(self, request, id):
+        user = User.objects.filter(id=id).first()
+        user.delete()
+        return Response({'message': 'User deleted successfully.'})
 
 
 class SignUp(APIView):
@@ -110,35 +136,39 @@ class BemorDetail(APIView):
         try:
             bemor = Bemor.objects.get(id=id)
             ser = BemorSer(bemor)
-            tashxis = Tashxis.objects.filter(bemor=bemor)
-            c = {}
-            sum_narx = tashxis.aggregate(Sum('narx'))
-            sum_tuladi = tashxis.aggregate(Sum('tuladi'))
-            sum_qoldi = tashxis.aggregate(Sum('qoldi'))
-            sum_tash = Tashxis.objects.filter(bemor=bemor).count()
-            c['sum_narx'] = sum_narx['narx__sum']
-            c['sum_tuladi'] = sum_tuladi['tuladi__sum']
-            c['sum_qoldi'] = sum_qoldi['qoldi__sum']
-            c['sum_tashxislar'] = sum_tash
-            d = []
-            for x in tashxis:
-                found = False
-                for item in d:
-                    if item['tashxislar'] == x.sick:
-                        # item['tashxislar'] = x.sick
-                        item['narx'] += x.narx
-                        item['tuladi'] += x.tuladi
-                        item['qoldi'] += x.qoldi
-                        item['sum_tashxis'] += 1
-                        found = True
-                        break
-                if not found:
-                    d.append({'tashxislar': x.sick, 'narx': x.narx,
-                              'tuladi': x.tuladi, 'qoldi': x.qoldi,
-                              'sum_tashxis': 1,})
+            if Tashxis.objects.filter(bemor=bemor):
+                tashxis = Tashxis.objects.filter(bemor=bemor)
+                c = {}
+                sum_narx = tashxis.aggregate(Sum('narx'))
+                sum_tuladi = tashxis.aggregate(Sum('tuladi'))
+                sum_qoldi = tashxis.aggregate(Sum('qoldi'))
+                sum_tash = Tashxis.objects.filter(bemor=bemor).count()
+                c['sum_narx'] = sum_narx['narx__sum']
+                c['sum_tuladi'] = sum_tuladi['tuladi__sum']
+                c['sum_qoldi'] = sum_qoldi['qoldi__sum']
+                c['sum_tashxislar'] = sum_tash
+                d = []
+                for x in tashxis:
+                    found = False
+                    for item in d:
+                        if item['tashxislar'] == x.sick:
+                            # item['tashxislar'] = x.sick
+                            item['narx'] += x.narx
+                            item['tuladi'] += x.tuladi
+                            item['qoldi'] += x.qoldi
+                            item['sum_tashxis'] += 1
+                            found = True
+                            break
+                    if not found:
+                        d.append({'tashxislar': x.sick, 'narx': x.narx,
+                                  'tuladi': x.tuladi, 'qoldi': x.qoldi,
+                                  'sum_tashxis': 1,})
+                return Response({'data': ser.data,
+                                 'all_statistic': c,
+                                 'statistic': d})
             return Response({'data': ser.data,
-                             'all_statistic': c,
-                             'statistic': d})
+                                 'all_statistic': None,
+                                 'statistic': None})
         except:
             return Response({'message': 'Not found'})
     
