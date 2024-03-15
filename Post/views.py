@@ -1,3 +1,4 @@
+from functools import partial
 from django.shortcuts import render
 from django.db.models import Q, F, Count, Sum, Min, Max
 from django.utils import timezone
@@ -23,35 +24,41 @@ class TashxisList(APIView):
         if serializer.is_valid():
             a = request.data.get('narx', None)
             b = request.data.get('tuladi', None)
-            c = request.data.get('qoldi', None)
             t = serializer.save()
-            if a and b and c:
-                t.c = a-b
+            if a and b:
+                t.qoldi = t.narx-t.tuladi
+                t.save()
+            elif a:
+                t.qoldi = t.narx
+                t.save()
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
 
 
 class TashxisDetail(APIView):
     parser_classes = (MultiPartParser, JSONParser)
-    def get(self, request):
-        tashxis = Tashxis.objects.all()
-        serializer = TashxisSer(tashxis, many=True)
+    def get(self, request, id):
+        tashxis = Tashxis.objects.get(id=id)
+        serializer = TashxisSer(tashxis)
         return Response(serializer.data)
 
-    def patch(self, request):
-        serializer = TashxisSer(data=request.data)
+    def patch(self, request, id):
+        tashxis = Tashxis.objects.get(id=id)
+        serializer = TashxisSer(tashxis, data=request.data, partial=True)
         if serializer.is_valid():
-            serializer.save()
             a = request.data.get('narx', None)
             b = request.data.get('tuladi', None)
-            c = request.data.get('qoldi', None)
             t = serializer.save()
-            if a and b and c:
-                t.c = a-b
+            if a and b:
+                t.qoldi = t.narx-t.tuladi
+                t.save()
+            elif a:
+                t.qoldi = t.narx
+                t.save()
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
 
-    def delete(self, request):
+    def delete(self, request, id):
         xodim = Tashxis.objects.filter(id=id).first()
         xodim.delete()
         return Response({'message': 'Deleted'})

@@ -42,12 +42,22 @@ class ChangePasswordView(APIView):
 
 
 class Userdetail(APIView):
-    # permission_classes = [IsAuthenticated,]
+    permission_classes = [IsAuthenticated,]
     def get(self, request, id):
         try:
             user = User.objects.get(id=id)
             ser = UserSer(user)
-            return Response(ser.data)
+            tashxis = Tashxis.objects.filter(user=user)
+            d = {}
+            sum_narx = tashxis.aggregate(Sum('narx'))
+            sum_tuladi = tashxis.aggregate(Sum('tuladi'))
+            sum_qoldi = tashxis.aggregate(Sum('qoldi'))
+            d['tuliq_narx'] = sum_narx['narx__sum']
+            d['tuliq_tuladi'] = sum_tuladi['tuladi__sum']
+            d['tuliq_qoldi'] = sum_qoldi['qoldi__sum']
+            d['tashxis'] = Tashxis.objects.filter(user=user).count()
+            return Response({'data': ser.data,
+                             'statistic': d})
         except:
             return Response({'message': 'Not found'})
     
@@ -98,9 +108,37 @@ class BemorDetail(APIView):
     parser_classes = [MultiPartParser, JSONParser]
     def get(self, request, id):
         try:
-            xodim = Bemor.objects.get(id=id)
-            ser = BemorSer(xodim)
-            return Response({'data': ser.data})
+            bemor = Bemor.objects.get(id=id)
+            ser = BemorSer(bemor)
+            tashxis = Tashxis.objects.filter(bemor=bemor)
+            c = {}
+            sum_narx = tashxis.aggregate(Sum('narx'))
+            sum_tuladi = tashxis.aggregate(Sum('tuladi'))
+            sum_qoldi = tashxis.aggregate(Sum('qoldi'))
+            sum_tash = Tashxis.objects.filter(bemor=bemor).count()
+            c['sum_narx'] = sum_narx['narx__sum']
+            c['sum_tuladi'] = sum_tuladi['tuladi__sum']
+            c['sum_qoldi'] = sum_qoldi['qoldi__sum']
+            c['sum_tashxislar'] = sum_tash
+            d = []
+            for x in tashxis:
+                found = False
+                for item in d:
+                    if item['tashxislar'] == x.sick:
+                        # item['tashxislar'] = x.sick
+                        item['narx'] += x.narx
+                        item['tuladi'] += x.tuladi
+                        item['qoldi'] += x.qoldi
+                        item['sum_tashxis'] += 1
+                        found = True
+                        break
+                if not found:
+                    d.append({'tashxislar': x.sick, 'narx': x.narx,
+                              'tuladi': x.tuladi, 'qoldi': x.qoldi,
+                              'sum_tashxis': 1,})
+            return Response({'data': ser.data,
+                             'all_statistic': c,
+                             'statistic': d})
         except:
             return Response({'message': 'Not found'})
     
