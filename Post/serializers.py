@@ -12,11 +12,10 @@ class TashxisSer(serializers.ModelSerializer):
     
 
 class TashxisGetSer(serializers.ModelSerializer):
-    user = UserSer()
     bemor = BemorSer()
     class Meta:
         model = Tashxis
-        fields = ['id', 'user', 'bemor', 'diagnoz', 'tashxis', 'date', 'created_at', 'narx', 'tuladi', 'qoldi']
+        fields = ['id', 'bemor', 'diagnoz', 'tashxis', 'date', 'created_at', 'narx', 'tuladi', 'qoldi']
 
 
 class TezTashxisSer(serializers.ModelSerializer):
@@ -24,7 +23,7 @@ class TezTashxisSer(serializers.ModelSerializer):
 
     class Meta:
         model = Tashxis
-        fields = ['id', 'user', 'bemor', 'date', 'diagnoz', 'tashxis', 'narx']
+        fields = ['id', 'bemor', 'date', 'diagnoz', 'tashxis', 'narx']
 
     def create(self, validated_data):
         bemor_data = validated_data.pop('bemor')
