@@ -53,11 +53,5 @@ class UserSer(serializers.ModelSerializer):
 class BemorSer(serializers.ModelSerializer):
     class Meta:
         model = Bemor
-        fields = ('id', 'first_name', 'last_name', 'dad_name', 'phone', 'address', 'date', 'created_at', 'user')
+        fields = ('id', 'first_name', 'last_name', 'dad_name', 'phone', 'address', 'date', 'created_at')
 
-
-class BemorGetSer(serializers.ModelSerializer):
-    user = UserSer()
-    class Meta:
-        model = Bemor
-        fields = ('id', 'first_name', 'last_name', 'dad_name', 'phone', 'address', 'date', 'created_at', 'user')

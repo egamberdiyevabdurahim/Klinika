@@ -13,7 +13,6 @@ class User(AbstractUser):
 
 
 class Bemor(models.Model):
-    user = models.ForeignKey(User, on_delete=models.SET_DEFAULT, default='uchirilgan user', related_name='bemor_user')
     first_name = models.CharField(max_length=60, null=True, blank=True)
     last_name = models.CharField(max_length=60, null=True, blank=True)
     dad_name = models.CharField(max_length=60, null=True, blank=True)

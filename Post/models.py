@@ -7,9 +7,10 @@ from User.models import User, Bemor
 
 
 class Tashxis(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    bemor = models.ForeignKey(Bemor, on_delete=models.CASCADE)
-    sick = models.TextField(null=True, blank=True)
+    user = models.ForeignKey(User, on_delete=models.SET_DEFAULT, default='uchirilgan user', related_name='tashxis_user')
+    bemor = models.ForeignKey(Bemor, on_delete=models.SET_DEFAULT, default='uchirilgan bemor', related_name='tashxis_user')
+    diagnoz = models.TextField(null=True, blank=True)
+    tashxis = models.TextField(null=True, blank=True)
     date = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     narx = models.PositiveIntegerField(default=0)
@@ -17,7 +18,7 @@ class Tashxis(models.Model):
     qoldi = models.PositiveIntegerField(default=0)
 
     def __str__(self):
-        return f'{self.sick}/{self.narx}'
+        return f'{self.diagnoz}/{self.narx}'
 
 # @receiver(post_save, sender=Tashxis)
 # def create_payment(sender, instance, created=False, **kwargs):

@@ -9,7 +9,7 @@ from rest_framework.parsers import MultiPartParser, JSONParser
 from django.contrib.auth.hashers import check_password
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .serializers import UserSer, BemorSer, ChangePasswordSerializer, BemorGetSer
+from .serializers import UserSer, BemorSer, ChangePasswordSerializer
 from .models import User, Bemor
 from Post.models import Tashxis
 
@@ -119,7 +119,7 @@ class BemorList(APIView):
     parser_classes = [MultiPartParser, JSONParser]
     def get(self, request):
         xodim = Bemor.objects.all()
-        ser = BemorGetSer(xodim, many=True)
+        ser = BemorSer(xodim, many=True)
         return Response(ser.data)
     
     def post(self, request):
@@ -151,18 +151,19 @@ class BemorDetail(APIView):
                 for x in tashxis:
                     found = False
                     for item in d:
-                        if item['tashxislar'] == x.sick:
-                            # item['tashxislar'] = x.sick
-                            item['narx'] += x.narx
-                            item['tuladi'] += x.tuladi
-                            item['qoldi'] += x.qoldi
-                            item['sum_tashxis'] += 1
-                            found = True
-                            break
+                        if item['diagnozlar'] == x.diagnoz:
+                            if item['tashxislar'] == x.tashxis:
+                                # item['tashxislar'] = x.sick
+                                item['narx'] += x.narx
+                                item['tuladi'] += x.tuladi
+                                item['qoldi'] += x.qoldi
+                                item['sum_tashxis'] += 1
+                                found = True
+                                break
                     if not found:
-                        d.append({'tashxislar': x.sick, 'narx': x.narx,
-                                  'tuladi': x.tuladi, 'qoldi': x.qoldi,
-                                  'sum_tashxis': 1,})
+                        d.append({'diagnozlar': x.diagnoz, 'tashxislar': x.tashxis,
+                                  'narx': x.narx, 'tuladi': x.tuladi,
+                                  'qoldi': x.qoldi, 'sum_tashxis': 1,})
                 return Response({'data': ser.data,
                                  'all_statistic': c,
                                  'statistic': d})
