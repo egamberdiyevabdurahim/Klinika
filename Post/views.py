@@ -8,6 +8,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser, JSONParser
 
+from User.serializers import BemorSer
+
 from .models import Tashxis
 from .serializers import TashxisSer, TashxisGetSer, TezTashxisSer
 from User.models import Bemor
@@ -25,14 +27,22 @@ class TashxisList(APIView):
         if serializer.is_valid():
             a = request.data.get('narx', None)
             b = request.data.get('tuladi', None)
+            bem = request.data.get('bemor', None)
             t = serializer.save()
+            
             if a and b:
                 t.qoldi = t.narx-t.tuladi
                 t.save()
+                # bemm = Bemor.objects.filter(tashxis_bemor=t.bemor)
+                # print(t.bemor.first_name)
+                bemser = BemorSer(t.bemor)
             elif a:
                 t.qoldi = t.narx
                 t.save()
-            return Response(serializer.data, status=201)
+                # bemm = Bemor.objects.filter(tashxis_bemor=bem)
+                # bemser = BemorSer(bemm)
+            return Response({'data':serializer.data,
+                             'bemor': bemser.data}, status=201)
         return Response(serializer.errors, status=400)
 
 
