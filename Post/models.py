@@ -7,8 +7,8 @@ from User.models import User, Bemor
 
 
 class Tashxis(models.Model):
-    user = models.ForeignKey(User, on_delete=models.SET_DEFAULT, default='uchirilgan user', related_name='tashxis_user')
-    bemor = models.ForeignKey(Bemor, on_delete=models.SET_DEFAULT, default='uchirilgan bemor', related_name='tashxis_user')
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='tashxis_user')
+    bemor = models.ForeignKey(Bemor, on_delete=models.SET_NULL, null=True, related_name='tashxis_user')
     diagnoz = models.TextField(null=True, blank=True)
     tashxis = models.TextField(null=True, blank=True)
     date = models.DateTimeField(null=True, blank=True)
